@@ -20,9 +20,9 @@ module SegmentTree =
             if low = high then
                 (Leaf { value = numbers[low] }, numbers[low])
             else
-                let mid = (low + high) / 2 in
-                let leftChild, lsum = create' low mid in
-                let rightChild, rsum = create' (mid + 1) high in
+                let mid = (low + high) / 2
+                let leftChild, lsum = create' low mid
+                let rightChild, rsum = create' (mid + 1) high
 
                 (Internal
                     { leftChild = leftChild
@@ -31,9 +31,9 @@ module SegmentTree =
                       high = high
                       sum = lsum + rsum
                       addend = 0 },
-                 lsum + rsum) in
+                 lsum + rsum)
 
-        let res, _ = create' 0 (numbers.Length - 1) in
+        let res, _ = create' 0 (numbers.Length - 1)
         res
 
     let queryRange (node: t) (low: int) (high: int) : int =
@@ -46,7 +46,7 @@ module SegmentTree =
                          high = h
                          sum = sum
                          addend = addend } ->
-                let mid = (l + h) / 2 in
+                let mid = (l + h) / 2
 
                 if low = l && high = h then
                     sum + ((high - low + 1) * accAddend)
@@ -56,7 +56,9 @@ module SegmentTree =
                     queryRange' rightChild low high (accAddend + addend)
                 else
                     queryRange' leftChild low mid (accAddend + addend)
-                    + queryRange' rightChild (mid + 1) high (accAddend + addend) in queryRange' node low high 0
+                    + queryRange' rightChild (mid + 1) high (accAddend + addend)
+
+        queryRange' node low high 0
 
     let rec updateRange (node: t) (low: int) (high: int) (delta: int) =
         match node with
@@ -67,7 +69,7 @@ module SegmentTree =
                      high = h
                      sum = sum
                      addend = addend } ->
-            let mid = (l + h) / 2 in
+            let mid = (l + h) / 2
 
             if low = l && high = h then
                 Internal
