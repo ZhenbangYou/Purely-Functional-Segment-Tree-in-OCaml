@@ -119,5 +119,3 @@ module SegmentTree =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
                       addend = addend }
-
-let inline add (a: 'a) (b: 'a) : 'a = a + b: 'a
