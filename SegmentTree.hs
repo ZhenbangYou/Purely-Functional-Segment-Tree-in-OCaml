@@ -1,9 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module SegmentTree
-  ( TreeNode,
-    create,
+module Lib
+  ( create,
     queryRange,
     updateRange,
   )
