@@ -62,7 +62,7 @@ module SegmentTree =
 
         queryRange' node low high zeroValue
 
-    let rec inline updateRange (node: treeNode< ^a >) (low: int) (high: int) (delta: ^a) : treeNode< ^a > =
+    let rec inline updateRange (node: treeNode< ^a >) (low': int) (high': int) (delta: ^a) : treeNode< ^a > =
         match node with
         | Leaf { value = value } -> Leaf { value = value + delta }
         | Internal { leftChild = leftChild
@@ -73,7 +73,7 @@ module SegmentTree =
                      addend = addend } ->
             let mid = (low + high) / 2
 
-            if low = low && high = high then
+            if low' = low && high' = high then
                 Internal
                     { leftChild = leftChild
                       rightChild = rightChild
@@ -83,7 +83,7 @@ module SegmentTree =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
                       addend = addend + delta }
-            else if high <= mid then
+            else if high' <= mid then
                 Internal
                     { leftChild = updateRange leftChild low high delta
                       rightChild = rightChild
@@ -93,7 +93,7 @@ module SegmentTree =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
                       addend = addend }
-            else if low > mid then
+            else if low' > mid then
                 Internal
                     { leftChild = leftChild
                       rightChild = updateRange rightChild low high delta
