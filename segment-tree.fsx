@@ -62,39 +62,33 @@ module SegmentTree =
 
         queryRange' node low high zeroValue
 
-    let rec inline updateRange
-        (node: treeNode< ^a >)
-        (low: int)
-        (high: int)
-        (delta: ^a)
-        (zeroValue: ^a)
-        : treeNode< ^a > =
+    let rec inline updateRange (node: treeNode< ^a >) (low: int) (high: int) (delta: ^a) : treeNode< ^a > =
         match node with
         | Leaf { value = value } -> Leaf { value = value + delta }
         | Internal { leftChild = leftChild
                      rightChild = rightChild
-                     low = l
-                     high = h
+                     low = low
+                     high = high
                      sum = sum
                      addend = addend } ->
-            let mid = (l + h) / 2
+            let mid = (low + high) / 2
 
-            if low = l && high = h then
+            if low = low && high = high then
                 Internal
                     { leftChild = leftChild
                       rightChild = rightChild
-                      low = l
-                      high = h
+                      low = low
+                      high = high
                       sum =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
                       addend = addend + delta }
             else if high <= mid then
                 Internal
-                    { leftChild = updateRange leftChild low high delta zeroValue
+                    { leftChild = updateRange leftChild low high delta
                       rightChild = rightChild
-                      low = l
-                      high = h
+                      low = low
+                      high = high
                       sum =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
@@ -102,19 +96,19 @@ module SegmentTree =
             else if low > mid then
                 Internal
                     { leftChild = leftChild
-                      rightChild = updateRange rightChild low high delta zeroValue
-                      low = l
-                      high = h
+                      rightChild = updateRange rightChild low high delta
+                      low = low
+                      high = high
                       sum =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
                       addend = addend }
             else
                 Internal
-                    { leftChild = updateRange leftChild low mid delta zeroValue
-                      rightChild = updateRange rightChild (mid + 1) high delta zeroValue
-                      low = l
-                      high = h
+                    { leftChild = updateRange leftChild low mid delta
+                      rightChild = updateRange rightChild (mid + 1) high delta
+                      low = low
+                      high = high
                       sum =
                         sum
                         + (List.reduce (+) [ for _ in low..high -> delta ])
