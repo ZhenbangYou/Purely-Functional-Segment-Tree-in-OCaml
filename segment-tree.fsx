@@ -84,7 +84,6 @@ module SegmentTree =
                       low = low
                       high = high
                       sum = newSum
-
                       addend = addend + delta }
             else if high' <= mid then
                 Internal
