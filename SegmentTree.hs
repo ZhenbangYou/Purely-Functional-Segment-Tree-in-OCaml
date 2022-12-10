@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Lib
+module SegmentTree
   ( create,
     queryRange,
     updateRange,
