@@ -2,7 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module SegmentTree
-  ( create,
+  ( TreeNode,
+    create,
     queryRange,
     updateRange,
   )
