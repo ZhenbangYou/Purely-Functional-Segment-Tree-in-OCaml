@@ -73,15 +73,18 @@ module SegmentTree =
                      addend = addend } ->
             let mid = (low + high) / 2
 
+            let newSum =
+                sum
+                + (List.reduce (+) [ for _ in low'..high' -> delta ])
+
             if low' = low && high' = high then
                 Internal
                     { leftChild = leftChild
                       rightChild = rightChild
                       low = low
                       high = high
-                      sum =
-                        sum
-                        + (List.reduce (+) [ for _ in low..high -> delta ])
+                      sum = newSum
+
                       addend = addend + delta }
             else if high' <= mid then
                 Internal
@@ -89,9 +92,7 @@ module SegmentTree =
                       rightChild = rightChild
                       low = low
                       high = high
-                      sum =
-                        sum
-                        + (List.reduce (+) [ for _ in low..high -> delta ])
+                      sum = newSum
                       addend = addend }
             else if low' > mid then
                 Internal
@@ -99,9 +100,7 @@ module SegmentTree =
                       rightChild = updateRange rightChild low high delta
                       low = low
                       high = high
-                      sum =
-                        sum
-                        + (List.reduce (+) [ for _ in low..high -> delta ])
+                      sum = newSum
                       addend = addend }
             else
                 Internal
@@ -109,7 +108,5 @@ module SegmentTree =
                       rightChild = updateRange rightChild (mid + 1) high delta
                       low = low
                       high = high
-                      sum =
-                        sum
-                        + (List.reduce (+) [ for _ in low..high -> delta ])
+                      sum = newSum
                       addend = addend }
