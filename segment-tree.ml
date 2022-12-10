@@ -1,96 +1,81 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RecordWildCards #-}
+module SegmentTree : sig
+  type t
 
-module SegmentTree
-  ( TreeNode,
-    create,
-    queryRange,
-    updateRange,
-  )
-where
+  val create : int array -> t
 
-import Data.Sequence
+  val queryRange : t -> int -> int -> int
 
-data TreeNode a
-  = Leaf a
-  | Internal
-      { leftChild :: TreeNode a,
-        rightChild :: TreeNode a,
-        low :: Int,
-        high :: Int,
-        childSum :: a,
-        addend :: a
-      }
-  deriving (Show)
+  val updateRange : t -> int -> int -> int -> t
+end = struct
+  type treeNode =
+    | Leaf of {value: int}
+    | Internal of
+        {leftChild: treeNode; rightChild: treeNode; low: int; high: int; sum: int; addend: int}
 
-create' :: Num a => Seq a -> Int -> Int -> (TreeNode a, a)
-create' numbers low high =
-  if low == high
-    then
-      let element = numbers `index` low
-       in (Leaf element, element)
-    else
-      let mid = (low + high) `div` 2
-          (leftChild, lsum) = create' numbers low mid
-          (rightChild, rsum) = create' numbers (mid + 1) high
-          childSum = lsum + rsum
-       in ( Internal
-              { leftChild,
-                rightChild,
-                low,
-                high,
-                childSum,
-                addend = 0
-              },
-            childSum
-          )
+  type t = treeNode
 
-create :: Num a => Seq a -> TreeNode a
-create numbers =
-  let (res, _) = create' numbers 0 (Data.Sequence.length numbers - 1)
-   in res
+  let create numbers =
+    let rec create' low high =
+      if low = high then (Leaf {value= numbers.(low)}, numbers.(low))
+      else
+        let mid = (low + high) / 2 in
+        let leftChild, lsum = create' low mid in
+        let rightChild, rsum = create' (mid + 1) high in
+        (Internal {leftChild; rightChild; low; high; sum= lsum + rsum; addend= 0}, lsum + rsum)
+    in
+    let res, _ = create' 0 (Array.length numbers - 1) in
+    res
 
-queryRange' :: Num a => TreeNode a -> Int -> Int -> a -> a
-queryRange' (Leaf v) _ _ accAddend = accAddend + v
-queryRange' (Internal {..}) low' high' accAddend =
-  let mid = (low + high) `div` 2
-   in case () of
-        _
-          | low == low' && high == high' -> childSum + fromIntegral (high' - low' + 1) * accAddend
-          | high' <= mid -> queryRange' leftChild low' high' (accAddend + addend)
-          | low' > mid -> queryRange' rightChild low' high' (accAddend + addend)
-          | otherwise ->
-              queryRange' leftChild low' mid (accAddend + addend)
-                + queryRange' rightChild (mid + 1) high' (accAddend + addend)
+  let queryRange (node : treeNode) (low : int) (high : int) : int =
+    let rec queryRange' (node : treeNode) (low : int) (high : int) (accAddend : int) : int =
+      match node with
+      | Leaf {value} -> accAddend + value
+      | Internal {leftChild; rightChild; low= l; high= h; sum; addend} ->
+          let mid = (l + h) / 2 in
+          if low = l && high = h then sum + ((high - low + 1) * accAddend)
+          else if high <= mid then queryRange' leftChild low high (accAddend + addend)
+          else if low > mid then queryRange' rightChild low high (accAddend + addend)
+          else
+            queryRange' leftChild low mid (accAddend + addend)
+            + queryRange' rightChild (mid + 1) high (accAddend + addend)
+    in
+    queryRange' node low high 0
 
-queryRange :: Num a => TreeNode a -> Int -> Int -> a
-queryRange node low high = queryRange' node low high 0
-
-updateRange :: Num a => TreeNode a -> Int -> Int -> a -> TreeNode a
-updateRange (Leaf v) _ _ delta = Leaf (v + delta)
-updateRange node@(Internal {..}) low' high' delta =
-  let mid = (low + high) `div` 2
-      newChildSum = childSum + fromIntegral (high' - low' + 1) * delta
-   in case () of
-        _
-          | low' == low && high' == high ->
-              node
-                { childSum = newChildSum,
-                  addend = addend + delta
-                }
-          | high' <= mid ->
-              node
-                { leftChild = updateRange leftChild low high delta,
-                  childSum = newChildSum
-                }
-          | low' > mid ->
-              node
-                { rightChild = updateRange rightChild low high delta,
-                  childSum = newChildSum
-                }
-          | otherwise ->
-              node
-                { leftChild = updateRange leftChild low mid delta,
-                  rightChild = updateRange rightChild (mid + 1) high delta,
-                  childSum = newChildSum
-                }
+  let rec updateRange node low high delta =
+    match node with
+    | Leaf {value} -> Leaf {value= value + delta}
+    | Internal {leftChild; rightChild; low= l; high= h; sum; addend} ->
+        let mid = (l + h) / 2 in
+        if low = l && high = h then
+          Internal
+            { leftChild
+            ; rightChild
+            ; low= l
+            ; high= h
+            ; sum= sum + ((high - low + 1) * delta)
+            ; addend= addend + delta }
+        else if high <= mid then
+          Internal
+            { leftChild= updateRange leftChild low high delta
+            ; rightChild
+            ; low= l
+            ; high= h
+            ; sum= sum + ((high - low + 1) * delta)
+            ; addend }
+        else if low > mid then
+          Internal
+            { leftChild
+            ; rightChild= updateRange rightChild low high delta
+            ; low= l
+            ; high= h
+            ; sum= sum + ((high - low + 1) * delta)
+            ; addend }
+        else
+          Internal
+            { leftChild= updateRange leftChild low mid delta
+            ; rightChild= updateRange rightChild (mid + 1) high delta
+            ; low= l
+            ; high= h
+            ; sum= sum + ((high - low + 1) * delta)
+            ; addend }
+end
