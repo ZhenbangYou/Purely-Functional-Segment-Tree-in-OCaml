@@ -56,7 +56,7 @@ queryRange' (Internal {..}) low' high' accAddend =
   let mid = (low + high) `div` 2
    in case () of
         _
-          | low == low' && high == high' -> childSum + sum (map (const accAddend) [low .. high])
+          | low == low' && high == high' -> childSum + fromIntegral (high' - low' + 1) * accAddend
           | high' <= mid -> queryRange' leftChild low' high' (accAddend + addend)
           | low' > mid -> queryRange' rightChild low' high' (accAddend + addend)
           | otherwise ->
@@ -70,10 +70,14 @@ updateRange :: Num a => TreeNode a -> Int -> Int -> a -> TreeNode a
 updateRange (Leaf v) _ _ delta = Leaf (v + delta)
 updateRange node@(Internal {..}) low' high' delta =
   let mid = (low + high) `div` 2
-      newChildSum = childSum + sum (map (const delta) [low .. high])
+      newChildSum = childSum + fromIntegral (high' - low' + 1) * delta
    in case () of
         _
-          | low' == low && high' == high -> node {childSum = newChildSum}
+          | low' == low && high' == high ->
+              node
+                { childSum = newChildSum,
+                  addend = addend + delta
+                }
           | high' <= mid ->
               node
                 { leftChild = updateRange leftChild low high delta,
